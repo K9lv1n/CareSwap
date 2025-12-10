@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome Setup{% endblock %}
+
+{% block head %}
+<style>
+    .onboarding-page {
+        min-height: calc(100vh - 200px);
+        padding: 40px 20px;
+        background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%);
+    }
+
+    .onboarding-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    /* Progress Steps */
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+        gap: 8px;
+    }
+
+    .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .step-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        background: var(--color-gray-200);
+        color: var(--color-gray-500);
+        transition: all 0.3s ease;
+    }
+
+    .progress-step.active .step-circle {
+        background: var(--color-primary);
+        color: white;
+    }
+
+    .progress-step.completed .step-circle {
+        background: var(--color-success);
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--color-gray-500);
+        display: none;
+    }
+
+    .progress-step.active .step-label {
+        display: block;
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .step-connector {
+        width: 40px;
+        height: 2px;
+        background: var(--color-gray-200);
+    }
+
+    .progress-step.completed+.step-connector {
+        background: var(--color-success);
+    }
+
+    /* Onboarding Card */
+    .onboarding-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .onboarding-header {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+        color: white;
+        padding: 32px 40px;
+        text-align: center;
+    }
+
+    .onboarding-header .emoji {
+        font-size: 3rem;
+        margin-bottom: 12px;
+    }
+
+    .onboarding-header h1 {
+        color: white;
+        font-size: 1.75rem;
+        margin-bottom: 8px;
+    }
+
+    .onboarding-header p {
+        opacity: 0.9;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .onboarding-body {
+        padding: 40px;
+    }
+
+    /* Step Content */
+    .step-content {
+        display: none;
+    }
+
+    .step-content.active {
+        display: block;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .step-title {
+        font-size: 1.3rem;
+        margin-bottom: 24px;
+        color: var(--color-gray-800);
+    }
+
+    /* Accessibility Options */
+    .accessibility-options {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .option-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 20px;
+        background: var(--color-gray-50);
+        border-radius: 16px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .option-card:hover {
+        border-color: var(--color-primary-100);
+    }
+
+    .option-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .option-content {
+        flex: 1;
+    }
+
+    .option-content h4 {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+
+    .option-content p {
+        font-size: 0.9rem;
+        color: var(--color-gray-600);
+        margin-bottom: 12px;
+    }
+
+    /* Font Size Selector */
+    .font-size-options {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .font-size-btn {
+        padding: 10px 20px;
+        border: 2px solid var(--color-gray-300);
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .font-size-btn:hover {
+        border-color: var(--color-primary);
+    }
+
+    .font-size-btn.active {
+        border-color: var(--color-primary);
+        background: var(--color-primary-50);
+        color: var(--color-primary);
+    }
+
+    .font-size-btn.small {
+        font-size: 0.9rem;
+    }
+
+    .font-size-btn.medium {
+        font-size: 1rem;
+    }
+
+    .font-size-btn.large {
+        font-size: 1.2rem;
+    }
+
+    .font-size-btn.xlarge {
+        font-size: 1.4rem;
+    }
+
+    /* Toggle Row */
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    /* Skills Selection */
+    .skills-section {
+        margin-bottom: 32px;
+    }
+
+    .skills-section h4 {
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .skills-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .skill-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        border: 2px solid var(--color-gray-300);
+        border-radius: 50px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+    .skill-chip:hover {
+        border-color: var(--color-primary);
+    }
+
+    .skill-chip.selected {
+        border-color: var(--color-primary);
+        background: var(--color-primary-50);
+        color: var(--color-primary);
+    }
+
+    .skill-chip input {
+        display: none;
+    }
+
+    /* Bio Section */
+    .bio-section textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Welcome Step */
+    .welcome-content {
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .welcome-emoji {
+        font-size: 5rem;
+        margin-bottom: 24px;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+        color: var(--color-primary);
+        margin-bottom: 16px;
+    }
+
+    .welcome-points {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--color-accent-dark);
+        margin-bottom: 24px;
+    }
+
+    .next-steps {
+        text-align: left;
+        background: var(--color-gray-50);
+        border-radius: 16px;
+        padding: 24px;
+        margin-top: 24px;
+    }
+
+    .next-steps h4 {
+        margin-bottom: 16px;
+    }
+
+    .next-steps ul {
+        list-style: none;
+    }
+
+    .next-steps li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--color-gray-200);
+    }
+
+    .next-steps li:last-child {
+        border-bottom: none;
+    }
+
+    /* Navigation Buttons */
+    .onboarding-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--color-gray-200);
+    }
+
+    .onboarding-nav .btn {
+        min-width: 140px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboarding-page">
+    <div class="onboarding-container animate-fade-in-up">
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="progress-step active" data-step="1">
+                <div class="step-circle">1</div>
+                <span class="step-label">Accessibility</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="progress-step" data-step="2">
+                <div class="step-circle">2</div>
+                <span class="step-label">About You</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="progress-step" data-step="3">
+                <div class="step-circle">3</div>
+                <span class="step-label">Skills</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="progress-step" data-step="4">
+                <div class="step-circle">4</div>
+                <span class="step-label">Welcome!</span>
+            </div>
+        </div>
+
+        <div class="onboarding-card">
+            <div class="onboarding-header">
+                <div class="emoji">👋</div>
+                <h1>Welcome, {{ user.name.split()[0] }}!</h1>
+                <p>Let's set up your CareSwap experience</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('onboarding') }}">
+                <div class="onboarding-body">
+                    <!-- Step 1: Accessibility -->
+                    <div class="step-content active" id="step-1">
+                        <h3 class="step-title">🎨 Customize Your Experience</h3>
+
+                        <div class="accessibility-options">
+                            <div class="option-card">
+                                <div class="option-icon">Aa</div>
+                                <div class="option-content">
+                                    <h4>Text Size</h4>
+                                    <p>Choose a comfortable reading size</p>
+                                    <div class="font-size-options">
+                                        <button type="button" class="font-size-btn small"
+                                            data-size="small">Small</button>
+                                        <button type="button"
+                                            class="font-size-btn medium {% if user.accessibility.font_size == 'medium' %}active{% endif %}"
+                                            data-size="medium">Medium</button>
+                                        <button type="button"
+                                            class="font-size-btn large {% if user.accessibility.font_size == 'large' %}active{% endif %}"
+                                            data-size="large">Large</button>
+                                        <button type="button"
+                                            class="font-size-btn xlarge {% if user.accessibility.font_size == 'xlarge' %}active{% endif %}"
+                                            data-size="xlarge">Extra Large</button>
+                                    </div>
+                                    <input type="hidden" name="font_size" id="font_size"
+                                        value="{{ user.accessibility.font_size }}">
+                                </div>
+                            </div>
+
+                            <div class="option-card">
+                                <div class="option-icon">🌓</div>
+                                <div class="option-content">
+                                    <div class="toggle-row">
+                                        <div>
+                                            <h4>High Contrast Mode</h4>
+                                            <p>Increases visibility with stronger colors</p>
+                                        </div>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="high_contrast" {% if
+                                                user.accessibility.high_contrast %}checked{% endif %}>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="option-card">
+                                <div class="option-icon">🎤</div>
+                                <div class="option-content">
+                                    <div class="toggle-row">
+                                        <div>
+                                            <h4>Voice Assistance</h4>
+                                            <p>Enable voice commands and text-to-speech</p>
+                                        </div>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="voice_enabled" {% if
+                                                user.accessibility.voice_enabled %}checked{% endif %}>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: About You -->
+                    <div class="step-content" id="step-2">
+                        <h3 class="step-title">📝 Tell Us About Yourself</h3>
+
+                        <div class="bio-section">
+                            <div class="form-group">
+                                <label class="form-label" for="bio">Short Bio</label>
+                                <textarea name="bio" id="bio" class="form-input form-textarea"
+                                    placeholder="Tell others a bit about yourself, your hobbies, or what you're looking for on CareSwap..."
+                                    data-maxlength="300">{{ user.bio }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Skills -->
+                    <div class="step-content" id="step-3">
+                        <h3 class="step-title">🎯 What Can You Offer & Learn?</h3>
+
+                        <div class="skills-section">
+                            <h4>💡 Skills I Can Teach</h4>
+                            <div class="skills-grid">
+                                {% set teach_skills = ['Cooking', 'Baking', 'Gardening', 'Sewing', 'Languages', 'Music',
+                                'Art', 'History', 'Dialect', 'Life Skills', 'Technology', 'Social Media', 'Photography']
+                                %}
+                                {% for skill in teach_skills %}
+                                <label class="skill-chip {% if skill in user.skills_teach %}selected{% endif %}">
+                                    <input type="checkbox" name="skills_teach" value="{{ skill }}" {% if skill in
+                                        user.skills_teach %}checked{% endif %}>
+                                    <span>{{ skill }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="skills-section">
+                            <h4>📚 Skills I Want to Learn</h4>
+                            <div class="skills-grid">
+                                {% set learn_skills = ['Smartphone', 'Apps', 'Online Banking', 'Video Calls', 'Social
+                                Media', 'Email', 'Cooking', 'Exercise', 'Languages', 'Music', 'Photography', 'Crafts']
+                                %}
+                                {% for skill in learn_skills %}
+                                <label class="skill-chip {% if skill in user.skills_learn %}selected{% endif %}">
+                                    <input type="checkbox" name="skills_learn" value="{{ skill }}" {% if skill in
+                                        user.skills_learn %}checked{% endif %}>
+                                    <span>{{ skill }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Welcome -->
+                    <div class="step-content" id="step-4">
+                        <div class="welcome-content">
+                            <div class="welcome-emoji">🎉</div>
+                            <h2 class="welcome-title">You're All Set!</h2>
+                            <p style="font-size: 1.1rem; color: var(--color-gray-600);">Welcome to the CareSwap
+                                community</p>
+
+                            <div class="welcome-points">
+                                <span>✨</span>
+                                <span>You've earned 100 AURA points!</span>
+                            </div>
+
+                            <div class="next-steps">
+                                <h4>What's Next?</h4>
+                                <ul>
+                                    <li>
+                                        <span>📋</span>
+                                        <span>Visit your dashboard to see available requests</span>
+                                    </li>
+                                    <li>
+                                        <span>✍️</span>
+                                        <span>Post your first help request or offer</span>
+                                    </li>
+                                    <li>
+                                        <span>👤</span>
+                                        <span>Complete your profile to attract more helpers</span>
+                                    </li>
+                                    <li>
+                                        <span>🏆</span>
+                                        <span>Earn badges by helping the community</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="onboarding-nav">
+                        <button type="button" class="btn btn-ghost" id="prev-btn" style="visibility: hidden;">
+                            ← Back
+                        </button>
+                        <button type="button" class="btn btn-primary" id="next-btn">
+                            Continue →
+                        </button>
+                        <button type="submit" class="btn btn-success btn-lg" id="finish-btn" style="display: none;">
+                            🚀 Start Exploring
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    const steps = document.querySelectorAll('.step-content');
+    const progressSteps = document.querySelectorAll('.progress-step');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const finishBtn = document.getElementById('finish-btn');
+
+    function showStep(step) {
+        // Update content
+        steps.forEach((s, i) => {
+            s.classList.toggle('active', i === step - 1);
+        });
+
+        // Update progress
+        progressSteps.forEach((p, i) => {
+            p.classList.remove('active', 'completed');
+            if (i < step - 1) {
+                p.classList.add('completed');
+            } else if (i === step - 1) {
+                p.classList.add('active');
+            }
+        });
+
+        // Update buttons
+        prevBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+
+        if (step === totalSteps) {
+            nextBtn.style.display = 'none';
+            finishBtn.style.display = 'block';
+        } else {
+            nextBtn.style.display = 'block';
+            finishBtn.style.display = 'none';
+        }
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+
+    // Font size selection
+    document.querySelectorAll('.font-size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('font_size').value = btn.dataset.size;
+
+            // Preview the font size
+            document.body.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-xlarge');
+            document.body.classList.add('font-size-' + btn.dataset.size);
+        });
+    });
+
+    // Skill chip selection
+    document.querySelectorAll('.skill-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            chip.classList.toggle('selected');
+        });
+    });
+</script>
+{% endblock %}

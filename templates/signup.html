@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}Join CareSwap{% endblock %}
+
+{% block head %}
+<style>
+    .signup-page {
+        min-height: calc(100vh - 200px);
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #fff1eb 0%, #ffeee6 50%, #ffddd2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .signup-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d14d72' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .signup-container {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 580px;
+    }
+
+    .signup-card {
+        background: var(--bg-card);
+        border-radius: 28px;
+        box-shadow: 0 25px 60px rgba(209, 77, 114, 0.15);
+        overflow: hidden;
+        border: 1px solid var(--color-gray-200);
+    }
+
+    .signup-header {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+        color: white;
+        padding: 36px;
+        text-align: center;
+    }
+
+    .signup-header .logo {
+        font-size: 3.5rem;
+        margin-bottom: 12px;
+    }
+
+    .signup-header h1 {
+        font-size: 1.75rem;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .signup-header p {
+        opacity: 0.9;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .signup-body {
+        padding: 40px;
+    }
+
+    /* User Type Selection */
+    .user-type-selection {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .user-type-option {
+        position: relative;
+    }
+
+    .user-type-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .user-type-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 28px 20px;
+        background: var(--bg-secondary);
+        border: 3px solid var(--color-gray-200);
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .user-type-card:hover {
+        border-color: var(--color-primary);
+        transform: translateY(-4px);
+    }
+
+    .user-type-option input:checked+.user-type-card {
+        border-color: var(--color-primary);
+        background: var(--color-primary-50);
+        box-shadow: 0 8px 25px rgba(209, 77, 114, 0.2);
+    }
+
+    .user-type-option input:checked+.user-type-card.senior {
+        border-color: var(--color-info);
+        background: rgba(116, 185, 255, 0.1);
+    }
+
+    .user-type-option input:checked+.user-type-card.youth {
+        border-color: var(--color-success);
+        background: rgba(78, 205, 196, 0.1);
+    }
+
+    .user-type-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+    }
+
+    .user-type-label {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .user-type-desc {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    /* Form Styles */
+    .signup-form .form-group {
+        margin-bottom: 22px;
+    }
+
+    .signup-form .form-label {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .signup-form .form-input {
+        padding: 16px;
+    }
+
+    .password-field {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 1.35rem;
+        cursor: pointer;
+        padding: 6px;
+        color: var(--text-muted);
+    }
+
+    /* Password Requirements */
+    .password-requirements {
+        margin-top: 14px;
+        padding: 16px;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+    }
+
+    .password-requirements p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
+
+    .requirement {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        padding: 6px 0;
+    }
+
+    .requirement.valid {
+        color: var(--color-success);
+    }
+
+    .requirement-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-gray-200);
+        font-size: 0.7rem;
+    }
+
+    .requirement.valid .requirement-icon {
+        background: var(--color-success);
+        color: white;
+    }
+
+    /* Terms */
+    .terms-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin: 28px 0;
+    }
+
+    .terms-check input {
+        width: 22px;
+        height: 22px;
+        margin-top: 2px;
+        accent-color: var(--color-primary);
+    }
+
+    .terms-check label {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .terms-check a {
+        color: var(--color-primary);
+        font-weight: 500;
+    }
+
+    .signup-btn {
+        width: 100%;
+        padding: 18px;
+        font-size: 1.15rem;
+    }
+
+    .signup-footer {
+        text-align: center;
+        margin-top: 28px;
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .signup-footer a {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    /* Dark mode */
+    [data-theme="dark"] .signup-page {
+        background: linear-gradient(135deg, #2a2220 0%, #3d2630 50%, #4a2d3a 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="signup-page">
+    <div class="signup-container animate-fade-in-up">
+        <div class="signup-card">
+            <div class="signup-header">
+                <div class="logo">🌟</div>
+                <h1>Join Our Family!</h1>
+                <p>Create your free account and start connecting</p>
+            </div>
+
+            <div class="signup-body">
+                <form class="signup-form" method="POST" action="{{ url_for('signup') }}" data-validate>
+                    <!-- User Type Selection -->
+                    <div class="user-type-selection">
+                        <label class="user-type-option">
+                            <input type="radio" name="user_type" value="senior" {% if user_type=='senior' %}checked{%
+                                endif %} required>
+                            <div class="user-type-card senior">
+                                <div class="user-type-icon">👵</div>
+                                <div class="user-type-label">I'm a Senior</div>
+                                <div class="user-type-desc">Get help from caring youths</div>
+                            </div>
+                        </label>
+                        <label class="user-type-option">
+                            <input type="radio" name="user_type" value="youth" {% if user_type !='senior' %}checked{%
+                                endif %} required>
+                            <div class="user-type-card youth">
+                                <div class="user-type-icon">🧑‍🎓</div>
+                                <div class="user-type-label">I'm a Youth</div>
+                                <div class="user-type-desc">Help seniors, earn rewards</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Form Fields -->
+                    <div class="form-group">
+                        <label class="form-label required" for="name">Your Full Name</label>
+                        <input type="text" id="name" name="name" class="form-input"
+                            placeholder="How should we call you?" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com"
+                            required autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="password">Create a Password</label>
+                        <div class="password-field">
+                            <input type="password" id="password" name="password" class="form-input"
+                                placeholder="Choose a secure password" required minlength="8"
+                                autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-toggle-password="password"
+                                aria-label="Show password">
+                                👁️
+                            </button>
+                        </div>
+
+                        <div class="password-requirements">
+                            <p>Your password must have:</p>
+                            <div class="requirement" data-requirement="length">
+                                <span class="requirement-icon">✓</span>
+                                <span>At least 8 characters</span>
+                            </div>
+                            <div class="requirement" data-requirement="letter">
+                                <span class="requirement-icon">✓</span>
+                                <span>At least one letter</span>
+                            </div>
+                            <div class="requirement" data-requirement="number">
+                                <span class="requirement-icon">✓</span>
+                                <span>At least one number</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="terms-check">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                            I understand that CareSwap is a community platform connecting seniors and youths.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary signup-btn btn-lg">
+                        Create My Account 🎉
+                    </button>
+
+                    <p class="signup-footer">
+                        Already have an account? <a href="{{ url_for('login') }}">Welcome back!</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const passwordInput = document.getElementById('password');
+    const requirements = {
+        length: pw => pw.length >= 8,
+        letter: pw => /[a-zA-Z]/.test(pw),
+        number: pw => /[0-9]/.test(pw)
+    };
+
+    passwordInput.addEventListener('input', () => {
+        const password = passwordInput.value;
+
+        Object.keys(requirements).forEach(key => {
+            const el = document.querySelector(`[data-requirement="${key}"]`);
+            const isValid = requirements[key](password);
+            el.classList.toggle('valid', isValid);
+        });
+    });
+</script>
+{% endblock %}

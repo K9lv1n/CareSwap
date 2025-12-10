@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+
+{% block title %}Create Request{% endblock %}
+
+{% block head %}
+<style>
+    .post-request-page {
+        padding: 40px 0;
+        background: var(--bg-primary);
+        min-height: calc(100vh - 200px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .page-header p {
+        color: var(--color-gray-600);
+        font-size: 1.1rem;
+    }
+
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+        color: white;
+        padding: 24px 32px;
+    }
+
+    .form-card-header h2 {
+        color: white;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-card-body {
+        padding: 32px;
+    }
+
+    /* Category Selection */
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .category-option {
+        position: relative;
+    }
+
+    .category-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .category-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 20px 16px;
+        border: 2px solid var(--color-gray-200);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .category-card:hover {
+        border-color: var(--color-primary);
+    }
+
+    .category-option input:checked+.category-card {
+        border-color: var(--color-primary);
+        background: var(--color-primary-50);
+    }
+
+    .category-icon {
+        font-size: 2rem;
+    }
+
+    .category-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--color-gray-700);
+        text-align: center;
+    }
+
+    /* Difficulty Selection */
+    .difficulty-options {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .difficulty-option {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .difficulty-option input {
+        display: none;
+    }
+
+    .difficulty-card {
+        display: block;
+        padding: 16px;
+        border: 2px solid var(--color-gray-200);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .difficulty-card:hover {
+        border-color: var(--color-gray-400);
+    }
+
+    .difficulty-option input:checked+.difficulty-card.easy {
+        border-color: var(--color-success);
+        background: #d1fae5;
+    }
+
+    .difficulty-option input:checked+.difficulty-card.medium {
+        border-color: var(--color-accent);
+        background: #fef3c7;
+    }
+
+    .difficulty-option input:checked+.difficulty-card.hard {
+        border-color: var(--color-secondary);
+        background: #fee2e2;
+    }
+
+    .difficulty-label {
+        font-weight: 600;
+    }
+
+    .difficulty-points {
+        font-size: 0.85rem;
+        color: var(--color-gray-500);
+        margin-top: 4px;
+    }
+
+    /* Skill Swap Toggle */
+    .swap-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border-radius: 16px;
+        margin-bottom: 24px;
+    }
+
+    .swap-info h4 {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .swap-info p {
+        font-size: 0.9rem;
+        color: var(--color-gray-600);
+        margin: 0;
+    }
+
+    /* AI Assistant */
+    .ai-assistant-box {
+        background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        color: white;
+    }
+
+    .ai-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .ai-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .ai-header div h4 {
+        color: white;
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .ai-header div p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .ai-input-group {
+        display: flex;
+        gap: 12px;
+    }
+
+    .ai-input {
+        flex: 1;
+        padding: 14px 16px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+    }
+
+    .ai-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .ai-input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+
+    .ai-voice-btn {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--color-accent);
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ai-voice-btn:hover {
+        transform: scale(1.1);
+    }
+
+    /* Points Estimate */
+    .points-estimate {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 16px;
+        margin-top: 24px;
+    }
+
+    .points-estimate-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--color-gray-800);
+    }
+
+    .points-estimate-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-accent-dark);
+    }
+
+    /* Submit Section */
+    .form-submit {
+        display: flex;
+        gap: 16px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--color-gray-200);
+    }
+
+    .form-submit .btn {
+        padding: 16px 32px;
+        font-size: 1.1rem;
+    }
+
+    /* Tips Sidebar */
+    .tips-sidebar {
+        background: white;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: var(--shadow-md);
+        margin-top: 32px;
+    }
+
+    .tips-sidebar h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 1.1rem;
+    }
+
+    .tips-list {
+        list-style: none;
+    }
+
+    .tips-list li {
+        display: flex;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--color-gray-100);
+        color: var(--color-gray-700);
+        font-size: 0.95rem;
+    }
+
+    .tips-list li:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .tips-list li span:first-child {
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="post-request-page">
+    <div class="container">
+        <div class="page-header animate-fade-in">
+            <h1>✨ Create a New Request</h1>
+            <p>Tell us what you need help with and we'll match you with the perfect helper!</p>
+        </div>
+
+        <div class="form-container">
+            <!-- AI Assistant Box -->
+            <div class="ai-assistant-box animate-fade-in-up">
+                <div class="ai-header">
+                    <div class="ai-icon">🤖</div>
+                    <div>
+                        <h4>AI Assistant</h4>
+                        <p>Just speak or type what you need! I'll help draft your request.</p>
+                    </div>
+                </div>
+                <div class="ai-input-group">
+                    <input type="text" class="ai-input" placeholder="e.g., Help me learn to use WhatsApp...">
+                    <button type="button" class="ai-voice-btn" title="Speak your request">
+                        🎤
+                    </button>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('post_request') }}" class="form-card animate-fade-in-up stagger-1">
+                <div class="form-card-header">
+                    <h2>📝 Request Details</h2>
+                </div>
+
+                <div class="form-card-body">
+                    <!-- Skill Swap Toggle -->
+                    <div class="swap-toggle">
+                        <div class="swap-info">
+                            <h4>🔄 Make this a Skill Swap?</h4>
+                            <p>Offer something in return and earn bonus AURA points!</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" name="is_swap">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Category Selection -->
+                    <div class="form-group">
+                        <label class="form-label">What type of help do you need?</label>
+                        <div class="category-grid">
+                            <label class="category-option">
+                                <input type="radio" name="category" value="technology" checked>
+                                <div class="category-card">
+                                    <span class="category-icon">📱</span>
+                                    <span class="category-label">Technology</span>
+                                </div>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="errands">
+                                <div class="category-card">
+                                    <span class="category-icon">🛒</span>
+                                    <span class="category-label">Errands</span>
+                                </div>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="home">
+                                <div class="category-card">
+                                    <span class="category-icon">🏠</span>
+                                    <span class="category-label">Home Help</span>
+                                </div>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="transport">
+                                <div class="category-card">
+                                    <span class="category-icon">🚗</span>
+                                    <span class="category-label">Transport</span>
+                                </div>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="companionship">
+                                <div class="category-card">
+                                    <span class="category-icon">💬</span>
+                                    <span class="category-label">Companionship</span>
+                                </div>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="other">
+                                <div class="category-card">
+                                    <span class="category-icon">📋</span>
+                                    <span class="category-label">Other</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label class="form-label required" for="title">Request Title</label>
+                        <input type="text" name="title" id="title" class="form-input"
+                            placeholder="e.g., Help me set up WhatsApp on my new phone" required maxlength="100">
+                        <div class="form-hint">Be specific so helpers know what you need</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label required" for="description">Description</label>
+                        <textarea name="description" id="description" class="form-input form-textarea"
+                            placeholder="Describe what you need help with in detail. The more information you provide, the better we can match you with the right helper!"
+                            required data-maxlength="500"></textarea>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-group">
+                        <label class="form-label required" for="location">Location</label>
+                        <input type="text" name="location" id="location" class="form-input"
+                            placeholder="e.g., Online / Video Call, or Blk 123 Tampines Ave 4" required>
+                        <div class="form-hint">Where should the helper meet you?</div>
+                    </div>
+
+                    <!-- Difficulty -->
+                    <div class="form-group">
+                        <label class="form-label">Estimated Difficulty</label>
+                        <div class="difficulty-options">
+                            <label class="difficulty-option">
+                                <input type="radio" name="difficulty" value="Easy" checked>
+                                <div class="difficulty-card easy">
+                                    <div class="difficulty-label">🟢 Easy</div>
+                                    <div class="difficulty-points">~30-50 pts</div>
+                                </div>
+                            </label>
+                            <label class="difficulty-option">
+                                <input type="radio" name="difficulty" value="Medium">
+                                <div class="difficulty-card medium">
+                                    <div class="difficulty-label">🟡 Medium</div>
+                                    <div class="difficulty-points">~60-80 pts</div>
+                                </div>
+                            </label>
+                            <label class="difficulty-option">
+                                <input type="radio" name="difficulty" value="Hard">
+                                <div class="difficulty-card hard">
+                                    <div class="difficulty-label">🔴 Hard</div>
+                                    <div class="difficulty-points">~100-150 pts</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Points Estimate -->
+                    <div class="points-estimate">
+                        <div class="points-estimate-label">
+                            <span>✨</span>
+                            <span>Estimated AURA Points for Helper:</span>
+                        </div>
+                        <div class="points-estimate-value" id="points-value">50</div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="form-submit">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            📤 Post Request
+                        </button>
+                        <a href="{% if user.type == 'senior' %}{{ url_for('senior_dashboard') }}{% else %}{{ url_for('youth_dashboard') }}{% endif %}"
+                            class="btn btn-ghost btn-lg">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Tips -->
+            <div class="tips-sidebar animate-fade-in-up stagger-2">
+                <h3>💡 Tips for a Great Request</h3>
+                <ul class="tips-list">
+                    <li>
+                        <span>✅</span>
+                        <span>Be specific about what you need - "Set up WhatsApp" is better than "Help with
+                            phone"</span>
+                    </li>
+                    <li>
+                        <span>📍</span>
+                        <span>Include your location or specify if it can be done online</span>
+                    </li>
+                    <li>
+                        <span>⏰</span>
+                        <span>Mention any time preferences or urgency in the description</span>
+                    </li>
+                    <li>
+                        <span>🔄</span>
+                        <span>Consider offering a skill swap - teach something in return for bonus points!</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update points estimate based on difficulty
+    document.querySelectorAll('input[name="difficulty"]').forEach(input => {
+        input.addEventListener('change', () => {
+            const pointsMap = {
+                'Easy': 50,
+                'Medium': 70,
+                'Hard': 120
+            };
+            document.getElementById('points-value').textContent = pointsMap[input.value];
+        });
+    });
+
+    // AI Voice button
+    document.querySelector('.ai-voice-btn').addEventListener('click', () => {
+        CareSwap.Toast.info('🎤 Voice input feature coming soon!');
+    });
+</script>
+{% endblock %}

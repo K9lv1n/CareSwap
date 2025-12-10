@@ -1,0 +1,628 @@
+{% extends "base.html" %}
+
+{% block title %}Youth Dashboard{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard-page {
+        padding: 40px 0;
+        background: var(--bg-primary);
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Welcome Header - Warm Gradient */
+    .dashboard-welcome {
+        background: linear-gradient(135deg, var(--color-success) 0%, #6eddd5 50%, var(--color-info) 100%);
+        border-radius: 24px;
+        padding: 32px;
+        color: white;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 24px;
+        box-shadow: 0 10px 30px rgba(78, 205, 196, 0.25);
+    }
+
+    .welcome-content h1 {
+        font-size: 1.75rem;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .welcome-content p {
+        opacity: 0.95;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.05rem;
+    }
+
+    .welcome-stats {
+        display: flex;
+        gap: 18px;
+    }
+
+    .welcome-stat {
+        text-align: center;
+        padding: 14px 22px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    .welcome-stat-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    .welcome-stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+
+    @media (max-width: 1000px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .filter-btn {
+        padding: 12px 22px;
+        border: 2px solid var(--color-gray-300);
+        border-radius: 50px;
+        background: var(--bg-card);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
+    .filter-btn.active {
+        border-color: var(--color-primary);
+        background: var(--color-primary);
+        color: white;
+    }
+
+    /* Sections */
+    .dashboard-section {
+        background: var(--bg-card);
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        border: 1px solid var(--color-gray-200);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 22px 26px;
+        border-bottom: 1px solid var(--color-gray-200);
+        background: var(--bg-secondary);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .section-body {
+        padding: 24px;
+    }
+
+    /* Request Cards */
+    .request-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .request-card {
+        background: var(--bg-secondary);
+        border-radius: 18px;
+        padding: 26px;
+        border-left: 4px solid var(--color-primary);
+        transition: all 0.3s ease;
+    }
+
+    .request-card:hover {
+        background: var(--bg-card);
+        box-shadow: var(--shadow-lg);
+        transform: translateX(4px);
+    }
+
+    .request-card.easy {
+        border-left-color: var(--color-success);
+    }
+
+    .request-card.medium {
+        border-left-color: var(--color-accent);
+    }
+
+    .request-card.hard {
+        border-left-color: var(--color-danger);
+    }
+
+    .request-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 14px;
+    }
+
+    .request-card-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .request-points {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #fff5e6 0%, #ffe4cc 100%);
+        border-radius: 50px;
+        font-weight: 700;
+        color: var(--color-accent-dark);
+        flex-shrink: 0;
+        font-size: 0.95rem;
+    }
+
+    .request-card-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 18px;
+        line-height: 1.65;
+    }
+
+    .request-card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .request-tags {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .request-tag {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        background: var(--color-gray-200);
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .request-tag.category {
+        background: var(--color-primary-50);
+        color: var(--color-primary);
+    }
+
+    .request-tag.difficulty-easy {
+        background: rgba(78, 205, 196, 0.2);
+        color: var(--color-success-dark);
+    }
+
+    .request-tag.difficulty-medium {
+        background: rgba(245, 166, 35, 0.2);
+        color: var(--color-accent-dark);
+    }
+
+    .request-tag.difficulty-hard {
+        background: rgba(231, 76, 60, 0.2);
+        color: var(--color-danger);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 52px 28px;
+    }
+
+    .empty-state-icon {
+        font-size: 4.5rem;
+        margin-bottom: 18px;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: var(--text-muted);
+    }
+
+    /* Points Card */
+    .points-card {
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+        border-radius: 20px;
+        padding: 28px;
+        color: white;
+        margin-bottom: 24px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(245, 166, 35, 0.3);
+    }
+
+    .points-card h3 {
+        color: white;
+        font-size: 1rem;
+        margin-bottom: 10px;
+        opacity: 0.9;
+    }
+
+    .points-value {
+        font-size: 3.25rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 14px;
+    }
+
+    .points-level {
+        display: inline-block;
+        padding: 8px 20px;
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    /* Leaderboard */
+    .leaderboard-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        background: var(--bg-secondary);
+        border-radius: 14px;
+    }
+
+    .leaderboard-rank {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        background: var(--color-gray-200);
+        color: var(--text-secondary);
+    }
+
+    .leaderboard-item:nth-child(1) .leaderboard-rank {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+    }
+
+    .leaderboard-item:nth-child(2) .leaderboard-rank {
+        background: linear-gradient(135deg, #9ca3af, #6b7280);
+        color: white;
+    }
+
+    .leaderboard-item:nth-child(3) .leaderboard-rank {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        color: white;
+    }
+
+    .leaderboard-user {
+        flex: 1;
+    }
+
+    .leaderboard-user h4 {
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+    }
+
+    .leaderboard-user p {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .leaderboard-points {
+        font-weight: 700;
+        color: var(--color-accent-dark);
+    }
+
+    /* My Tasks */
+    .my-task-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px;
+        background: var(--bg-secondary);
+        border-radius: 14px;
+        margin-bottom: 14px;
+    }
+
+    .task-status-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+        background: rgba(245, 166, 35, 0.2);
+    }
+
+    .task-info {
+        flex: 1;
+    }
+
+    .task-info h4 {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    .task-info p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* Badges Preview */
+    .badges-preview {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .badge-preview-item {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        background: var(--bg-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.85rem;
+        transition: transform 0.2s ease;
+        border: 2px solid var(--color-gray-200);
+    }
+
+    .badge-preview-item:hover {
+        transform: scale(1.1);
+        border-color: var(--color-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <div class="container">
+        <!-- Welcome Header -->
+        <div class="dashboard-welcome animate-fade-in">
+            <div class="welcome-content">
+                <h1>🚀 Ready to Help, {{ user.name.split()[0] }}!</h1>
+                <p>Find seniors who need your help and earn AURA points!</p>
+            </div>
+            <div class="welcome-stats">
+                <div class="welcome-stat">
+                    <div class="welcome-stat-value">✨ {{ user.aura_points }}</div>
+                    <div class="welcome-stat-label">AURA Points</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-value">🏆 {{ user.badges|length }}</div>
+                    <div class="welcome-stat-label">Badges</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-value">⭐ {{ user.rating }}</div>
+                    <div class="welcome-stat-label">Rating</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div>
+                <!-- Filter Bar -->
+                <div class="filter-bar animate-fade-in-up">
+                    <button class="filter-btn active">All Requests</button>
+                    <button class="filter-btn">📱 Technology</button>
+                    <button class="filter-btn">🛒 Errands</button>
+                    <button class="filter-btn">🔄 Skill Swap</button>
+                    <button class="filter-btn">🏠 Home Help</button>
+                </div>
+
+                <div class="dashboard-section animate-fade-in-up stagger-1">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>📋</span>
+                            <span>Available Requests</span>
+                        </div>
+                        <span class="badge badge-success">{{ requests|length }} Open</span>
+                    </div>
+                    <div class="section-body">
+                        {% if requests %}
+                        <div class="request-grid">
+                            {% for req in requests %}
+                            <div class="request-card {{ req.difficulty|lower }}">
+                                <div class="request-card-header">
+                                    <div class="request-card-title">{{ req.title }}</div>
+                                    <div class="request-points">
+                                        <span>✨</span>
+                                        <span>{{ req.aura_points }}</span>
+                                    </div>
+                                </div>
+                                <p class="request-card-desc">{{ req.description[:120] }}{% if req.description|length >
+                                    120 %}...{% endif %}</p>
+                                <div class="request-card-meta">
+                                    <div class="request-tags">
+                                        <span class="request-tag category">{{ req.category|capitalize }}</span>
+                                        <span class="request-tag difficulty-{{ req.difficulty|lower }}">{{
+                                            req.difficulty }}</span>
+                                        <span class="request-tag">📍 {{ req.location }}</span>
+                                    </div>
+                                    <a href="{{ url_for('accept_request', request_id=req.id) }}"
+                                        class="btn btn-success btn-sm">
+                                        Accept 💕
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎉</div>
+                            <h3>All caught up!</h3>
+                            <p>No open requests at the moment. Check back soon!</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Points Card -->
+                <div class="points-card animate-fade-in-up stagger-2">
+                    <h3>Your AURA Points</h3>
+                    <div class="points-value">{{ user.aura_points }}</div>
+                    <div class="points-level">🎖️ Level {{ user.level }}</div>
+                </div>
+
+                <!-- My Tasks -->
+                {% if my_tasks %}
+                <div class="dashboard-section animate-fade-in-up stagger-3" style="margin-bottom: 24px;">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>📌</span>
+                            <span>My Active Tasks</span>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        {% for task in my_tasks %}
+                        <div class="my-task-item">
+                            <div class="task-status-icon">⏳</div>
+                            <div class="task-info">
+                                <h4>{{ task.title }}</h4>
+                                <p>{{ task.location }}</p>
+                            </div>
+                            <a href="{{ url_for('complete_request', request_id=task.id) }}"
+                                class="btn btn-success btn-sm">
+                                Complete
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Leaderboard -->
+                <div class="dashboard-section animate-fade-in-up stagger-4" style="margin-bottom: 24px;">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>🏆</span>
+                            <span>Top Helpers</span>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="leaderboard-list">
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-rank">1</div>
+                                <div class="leaderboard-user">
+                                    <h4>Sarah Chen</h4>
+                                    <p>45 tasks completed</p>
+                                </div>
+                                <div class="leaderboard-points">2,340</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-rank">2</div>
+                                <div class="leaderboard-user">
+                                    <h4>{{ user.name }}</h4>
+                                    <p>{{ user.completed_tasks }} tasks completed</p>
+                                </div>
+                                <div class="leaderboard-points">{{ user.aura_points }}</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-rank">3</div>
+                                <div class="leaderboard-user">
+                                    <h4>Michael Tan</h4>
+                                    <p>28 tasks completed</p>
+                                </div>
+                                <div class="leaderboard-points">1,560</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Badges -->
+                <div class="dashboard-section animate-fade-in-up stagger-5">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>🏅</span>
+                            <span>My Badges</span>
+                        </div>
+                        <a href="{{ url_for('profile') }}" class="btn btn-ghost btn-sm">View All</a>
+                    </div>
+                    <div class="section-body">
+                        <div class="badges-preview">
+                            {% for badge in user.badges[:6] %}
+                            <div class="badge-preview-item" title="{{ badge.name }}">
+                                {{ badge.icon }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            CareSwap.Toast.info('Filter: ' + btn.textContent.trim());
+        });
+    });
+</script>
+{% endblock %}

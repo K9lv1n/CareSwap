@@ -1,0 +1,728 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.name }} - Profile{% endblock %}
+
+{% block head %}
+<style>
+    .profile-page {
+        padding: 40px 0;
+        background: var(--bg-primary);
+        min-height: calc(100vh - 200px);
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, #4299e1 100%);
+        border-radius: 24px;
+        padding: 40px;
+        color: white;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+    }
+
+    .profile-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 32px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        flex-shrink: 0;
+    }
+
+    .profile-info {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: white;
+    }
+
+    .profile-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+    }
+
+    .profile-meta {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .profile-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .profile-stats {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .profile-stat {
+        text-align: center;
+        padding: 16px 24px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    .profile-stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .profile-stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    /* Grid Layout */
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .profile-section {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .profile-section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--color-gray-200);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .profile-section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .profile-section-body {
+        padding: 24px;
+    }
+
+    /* AURA Points Section */
+    .aura-section {
+        grid-column: span 2;
+    }
+
+    @media (max-width: 900px) {
+        .aura-section {
+            grid-column: span 1;
+        }
+    }
+
+    .aura-display-large {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        flex-wrap: wrap;
+    }
+
+    .aura-points-big {
+        text-align: center;
+    }
+
+    .aura-points-value {
+        font-size: 4rem;
+        font-weight: 800;
+        color: var(--color-accent);
+        line-height: 1;
+        text-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+    }
+
+    .aura-points-label {
+        font-size: 1.1rem;
+        color: var(--color-gray-600);
+        margin-top: 8px;
+    }
+
+    .aura-level-info {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+        color: white;
+        border-radius: 50px;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .level-progress {
+        margin-bottom: 12px;
+    }
+
+    .level-progress-bar {
+        height: 12px;
+        background: var(--color-gray-200);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .level-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+        border-radius: 6px;
+        transition: width 1s ease;
+    }
+
+    .level-progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--color-gray-500);
+        margin-top: 6px;
+    }
+
+    /* Badges Section */
+    .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+    }
+
+    .badge-item {
+        text-align: center;
+        padding: 20px 12px;
+        background: var(--color-gray-50);
+        border-radius: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .badge-item:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .badge-item.locked {
+        opacity: 0.4;
+        filter: grayscale(1);
+    }
+
+    .badge-icon {
+        font-size: 2.5rem;
+        margin-bottom: 8px;
+    }
+
+    .badge-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--color-gray-800);
+        margin-bottom: 4px;
+    }
+
+    .badge-date {
+        font-size: 0.75rem;
+        color: var(--color-gray-500);
+    }
+
+    /* Rating Section */
+    .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .rating-big {
+        text-align: center;
+    }
+
+    .rating-value {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--color-accent);
+        line-height: 1;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 4px;
+        font-size: 1.5rem;
+        margin-top: 8px;
+    }
+
+    .rating-star.filled {
+        color: var(--color-accent);
+    }
+
+    .rating-star.empty {
+        color: var(--color-gray-300);
+    }
+
+    .rating-breakdown {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .rating-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .rating-bar-label {
+        width: 24px;
+        font-size: 0.9rem;
+        color: var(--color-gray-600);
+    }
+
+    .rating-bar-track {
+        flex: 1;
+        height: 8px;
+        background: var(--color-gray-200);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .rating-bar-fill {
+        height: 100%;
+        background: var(--color-accent);
+        border-radius: 4px;
+    }
+
+    .rating-bar-count {
+        width: 30px;
+        font-size: 0.85rem;
+        color: var(--color-gray-500);
+        text-align: right;
+    }
+
+    /* Bio Section */
+    .bio-text {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--color-gray-700);
+    }
+
+    /* Skills Section */
+    .skills-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .skill-tag {
+        padding: 8px 16px;
+        background: var(--color-gray-100);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        color: var(--color-gray-700);
+    }
+
+    .skill-tag.teach {
+        background: var(--color-primary-50);
+        color: var(--color-primary);
+    }
+
+    .skill-tag.learn {
+        background: #d1fae5;
+        color: var(--color-success-dark);
+    }
+
+    /* Activity Section */
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .activity-item {
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: var(--color-gray-50);
+        border-radius: 12px;
+    }
+
+    .activity-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .activity-icon.task {
+        background: var(--color-primary-50);
+    }
+
+    .activity-icon.badge {
+        background: #fef3c7;
+    }
+
+    .activity-content h4 {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .activity-content p {
+        font-size: 0.85rem;
+        color: var(--color-gray-500);
+        margin: 0;
+    }
+
+    /* Edit Profile Button */
+    .edit-profile-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .profile-header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-meta {
+            justify-content: center;
+        }
+
+        .profile-stats {
+            justify-content: center;
+        }
+
+        .aura-display-large {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header animate-fade-in">
+            {% if is_own_profile %}
+            <a href="{{ url_for('settings') }}" class="btn btn-ghost edit-profile-btn" style="color: white;">
+                ✏️ Edit Profile
+            </a>
+            {% endif %}
+
+            <div class="profile-header-content">
+                <div class="profile-avatar">
+                    {{ user.name[0] }}
+                </div>
+
+                <div class="profile-info">
+                    <h1 class="profile-name">{{ user.name }}</h1>
+                    <div class="profile-type">
+                        {% if user.type == 'senior' %}
+                        <span>👵</span> Senior Member
+                        {% else %}
+                        <span>🧑‍🎓</span> Youth Helper
+                        {% endif %}
+                    </div>
+                    <div class="profile-meta">
+                        <div class="profile-meta-item">
+                            <span>📅</span>
+                            <span>Joined {{ user.joined_date }}</span>
+                        </div>
+                        <div class="profile-meta-item">
+                            <span>✅</span>
+                            <span>{{ user.completed_tasks }} tasks completed</span>
+                        </div>
+                        {% if is_own_profile and user.privacy.show_email %}
+                        <div class="profile-meta-item">
+                            <span>📧</span>
+                            <span>{{ user.email }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">✨ {{ user.aura_points }}</div>
+                        <div class="profile-stat-label">AURA Points</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">⭐ {{ user.rating }}</div>
+                        <div class="profile-stat-label">Rating</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">🏆 {{ user.badges|length }}</div>
+                        <div class="profile-stat-label">Badges</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Content Grid -->
+        <div class="profile-grid">
+            <!-- AURA Points Section -->
+            <div class="profile-section aura-section animate-fade-in-up">
+                <div class="profile-section-header">
+                    <div class="profile-section-title">
+                        <span>✨</span>
+                        <span>AURA Points & Level</span>
+                    </div>
+                </div>
+                <div class="profile-section-body">
+                    <div class="aura-display-large">
+                        <div class="aura-points-big">
+                            <div class="aura-points-value" data-counter="{{ user.aura_points }}" data-duration="1500">0
+                            </div>
+                            <div class="aura-points-label">AURA Points</div>
+                        </div>
+
+                        <div class="aura-level-info">
+                            <div class="level-badge">
+                                <span>🎖️</span>
+                                <span>Level {{ user.level }}</span>
+                            </div>
+
+                            <div class="level-progress">
+                                <div class="level-progress-bar">
+                                    {% set progress = (user.aura_points % 500) / 500 * 100 %}
+                                    <div class="level-progress-fill" style="width: {{ progress }}%;"></div>
+                                </div>
+                                <div class="level-progress-text">
+                                    <span>{{ user.aura_points % 500 }} / 500 to next level</span>
+                                    <span>Level {{ user.level + 1 }}</span>
+                                </div>
+                            </div>
+
+                            <p style="font-size: 0.9rem; color: var(--color-gray-600);">
+                                Earn AURA points by helping others, completing tasks, and being an active community
+                                member!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges Section -->
+            <div class="profile-section animate-fade-in-up stagger-1">
+                <div class="profile-section-header">
+                    <div class="profile-section-title">
+                        <span>🏅</span>
+                        <span>Badges Earned</span>
+                    </div>
+                    <span class="badge badge-accent">{{ user.badges|length }} / {{ all_badges|length }}</span>
+                </div>
+                <div class="profile-section-body">
+                    <div class="badges-grid">
+                        {% for badge in user.badges %}
+                        <div class="badge-item" title="{{ all_badges.get(badge.id, {}).get('description', '') }}">
+                            <div class="badge-icon">{{ badge.icon }}</div>
+                            <div class="badge-name">{{ badge.name }}</div>
+                            <div class="badge-date">{{ badge.earned }}</div>
+                        </div>
+                        {% endfor %}
+
+                        {% for badge_id, badge_info in all_badges.items() %}
+                        {% set earned_ids = user.badges|map(attribute='id')|list %}
+                        {% if badge_id not in earned_ids %}
+                        <div class="badge-item locked" title="{{ badge_info.description }}">
+                            <div class="badge-icon">{{ badge_info.icon }}</div>
+                            <div class="badge-name">{{ badge_info.name }}</div>
+                            <div class="badge-date">Locked</div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating Section -->
+            <div class="profile-section animate-fade-in-up stagger-2">
+                <div class="profile-section-header">
+                    <div class="profile-section-title">
+                        <span>⭐</span>
+                        <span>Ratings & Reviews</span>
+                    </div>
+                </div>
+                <div class="profile-section-body">
+                    <div class="rating-display">
+                        <div class="rating-big">
+                            <div class="rating-value">{{ user.rating }}</div>
+                            <div class="rating-stars">
+                                {% for i in range(5) %}
+                                {% if i < user.rating|int %} <span class="rating-star filled">★</span>
+                                    {% else %}
+                                    <span class="rating-star empty">★</span>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
+                            <p style="font-size: 0.9rem; color: var(--color-gray-500); margin-top: 8px;">
+                                {{ user.rating_count }} reviews
+                            </p>
+                        </div>
+
+                        <div class="rating-breakdown">
+                            {% for star in [5, 4, 3, 2, 1] %}
+                            <div class="rating-bar">
+                                <span class="rating-bar-label">{{ star }}★</span>
+                                <div class="rating-bar-track">
+                                    {% set pct = 90 if star == 5 else (8 if star == 4 else 2) %}
+                                    <div class="rating-bar-fill" style="width: {{ pct }}%;"></div>
+                                </div>
+                                <span class="rating-bar-count">{{ (user.rating_count * pct / 100)|int }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio Section -->
+            <div class="profile-section animate-fade-in-up stagger-3">
+                <div class="profile-section-header">
+                    <div class="profile-section-title">
+                        <span>📝</span>
+                        <span>About Me</span>
+                    </div>
+                </div>
+                <div class="profile-section-body">
+                    {% if user.bio %}
+                    <p class="bio-text">{{ user.bio }}</p>
+                    {% else %}
+                    <p class="bio-text" style="color: var(--color-gray-400); font-style: italic;">
+                        No bio added yet.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Skills Section -->
+            <div class="profile-section animate-fade-in-up stagger-4">
+                <div class="profile-section-header">
+                    <div class="profile-section-title">
+                        <span>🎯</span>
+                        <span>Skills</span>
+                    </div>
+                </div>
+                <div class="profile-section-body">
+                    {% if user.skills_teach %}
+                    <h4 style="font-size: 0.9rem; color: var(--color-gray-600); margin-bottom: 12px;">💡 Can Teach</h4>
+                    <div class="skills-list" style="margin-bottom: 20px;">
+                        {% for skill in user.skills_teach %}
+                        <span class="skill-tag teach">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if user.skills_learn %}
+                    <h4 style="font-size: 0.9rem; color: var(--color-gray-600); margin-bottom: 12px;">📚 Wants to Learn
+                    </h4>
+                    <div class="skills-list">
+                        {% for skill in user.skills_learn %}
+                        <span class="skill-tag learn">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if not user.skills_teach and not user.skills_learn %}
+                    <p style="color: var(--color-gray-400); font-style: italic;">
+                        No skills added yet.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="profile-section animate-fade-in-up stagger-5">
+                <div class="profile-section-header">
+                    <div class="profile-section-title">
+                        <span>📊</span>
+                        <span>Recent Activity</span>
+                    </div>
+                </div>
+                <div class="profile-section-body">
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon task">📋</div>
+                            <div class="activity-content">
+                                <h4>Completed "Help with WhatsApp setup"</h4>
+                                <p>2 days ago • Earned 50 AURA points</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon badge">🏆</div>
+                            <div class="activity-content">
+                                <h4>Earned "Patient Teacher" badge</h4>
+                                <p>1 week ago</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon task">📋</div>
+                            <div class="activity-content">
+                                <h4>Helped with "Grocery shopping assistance"</h4>
+                                <p>1 week ago • Earned 80 AURA points</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

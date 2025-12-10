@@ -1,0 +1,779 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block head %}
+<style>
+    .settings-page {
+        padding: 40px 0;
+        background: var(--bg-primary);
+        min-height: calc(100vh - 200px);
+    }
+
+    .settings-header {
+        margin-bottom: 40px;
+    }
+
+    .settings-header h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .settings-header p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    .settings-layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 32px;
+    }
+
+    @media (max-width: 900px) {
+        .settings-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Settings Tabs */
+    .settings-tabs {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: var(--shadow-sm);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+        border: 1px solid var(--color-gray-200);
+    }
+
+    .settings-tab {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 20px;
+        margin-bottom: 8px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-secondary);
+        font-weight: 500;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        font-size: 1rem;
+    }
+
+    .settings-tab:hover {
+        background: var(--color-gray-100);
+        color: var(--text-primary);
+    }
+
+    .settings-tab.active {
+        background: var(--color-primary-50);
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .settings-tab-icon {
+        font-size: 1.35rem;
+    }
+
+    /* Settings Content */
+    .settings-content {
+        background: var(--bg-card);
+        border-radius: 24px;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        border: 1px solid var(--color-gray-200);
+    }
+
+    .settings-panel {
+        display: none;
+    }
+
+    .settings-panel.active {
+        display: block;
+    }
+
+    .settings-panel-header {
+        padding: 28px 32px;
+        border-bottom: 1px solid var(--color-gray-200);
+        background: var(--bg-secondary);
+    }
+
+    .settings-panel-header h2 {
+        font-size: 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    .settings-panel-body {
+        padding: 32px;
+    }
+
+    /* Settings Groups */
+    .settings-group {
+        margin-bottom: 36px;
+    }
+
+    .settings-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .settings-group-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--color-gray-200);
+    }
+
+    /* Settings Item */
+    .settings-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--color-gray-100);
+    }
+
+    .settings-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .settings-item-info {
+        flex: 1;
+        margin-right: 24px;
+    }
+
+    .settings-item-info h4 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--text-primary);
+    }
+
+    .settings-item-info p {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Font Size Selector */
+    .font-size-selector {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .font-size-btn {
+        padding: 14px 22px;
+        background: var(--bg-secondary);
+        border: 2px solid var(--color-gray-300);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        min-width: 90px;
+    }
+
+    .font-size-btn:hover {
+        border-color: var(--color-primary);
+    }
+
+    .font-size-btn.active,
+    .font-size-btn.selected {
+        border-color: var(--color-primary);
+        background: var(--color-primary-50);
+        color: var(--color-primary);
+    }
+
+    .font-size-btn .size-label {
+        font-weight: 600;
+    }
+
+    .font-size-btn.small .size-preview {
+        font-size: 12px;
+    }
+
+    .font-size-btn.medium .size-preview {
+        font-size: 14px;
+    }
+
+    .font-size-btn.large .size-preview {
+        font-size: 18px;
+    }
+
+    .font-size-btn.xlarge .size-preview {
+        font-size: 22px;
+    }
+
+    /* Theme Selector */
+    .theme-selector {
+        display: flex;
+        gap: 16px;
+    }
+
+    .theme-btn {
+        padding: 20px 28px;
+        border-radius: 16px;
+        border: 2px solid var(--color-gray-300);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        min-width: 110px;
+        background: var(--bg-secondary);
+    }
+
+    .theme-btn:hover {
+        border-color: var(--color-primary);
+    }
+
+    .theme-btn.active {
+        border-color: var(--color-primary);
+        background: var(--color-primary-50);
+    }
+
+    .theme-btn-icon {
+        font-size: 2rem;
+    }
+
+    .theme-btn-label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Danger Zone */
+    .danger-zone {
+        background: var(--color-gray-50);
+        padding: 28px;
+        border-radius: 16px;
+        border: 2px solid var(--color-danger);
+        margin-top: 36px;
+    }
+
+    .danger-zone h3 {
+        color: var(--color-danger);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+    }
+
+    .danger-zone p {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    /* Save Button */
+    .settings-save {
+        margin-top: 28px;
+        padding-top: 24px;
+        border-top: 1px solid var(--color-gray-200);
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+    }
+
+    .settings-save .btn {
+        min-width: 160px;
+    }
+
+    /* Select styles */
+    .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 12px center;
+        background-repeat: no-repeat;
+        background-size: 20px;
+        padding-right: 44px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <div class="container">
+        <div class="settings-header animate-fade-in">
+            <h1>⚙️ Settings</h1>
+            <p>Customize your CareSwap experience</p>
+        </div>
+
+        <div class="settings-layout">
+            <!-- Settings Tabs -->
+            <div class="settings-tabs animate-fade-in-up">
+                <button class="settings-tab active" data-tab="accessibility">
+                    <span class="settings-tab-icon">👁️</span>
+                    <span>Accessibility</span>
+                </button>
+                <button class="settings-tab" data-tab="appearance">
+                    <span class="settings-tab-icon">🎨</span>
+                    <span>Appearance</span>
+                </button>
+                <button class="settings-tab" data-tab="account">
+                    <span class="settings-tab-icon">👤</span>
+                    <span>Account</span>
+                </button>
+                <button class="settings-tab" data-tab="privacy">
+                    <span class="settings-tab-icon">🔒</span>
+                    <span>Privacy</span>
+                </button>
+                <button class="settings-tab" data-tab="notifications">
+                    <span class="settings-tab-icon">🔔</span>
+                    <span>Notifications</span>
+                </button>
+                <button class="settings-tab" data-tab="security">
+                    <span class="settings-tab-icon">🛡️</span>
+                    <span>Security</span>
+                </button>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="settings-content animate-fade-in-up stagger-1">
+                <!-- Accessibility Panel -->
+                <div class="settings-panel active" id="panel-accessibility">
+                    <div class="settings-panel-header">
+                        <h2>👁️ Accessibility Settings</h2>
+                    </div>
+                    <div class="settings-panel-body">
+                        <form method="POST" action="{{ url_for('settings') }}">
+                            <input type="hidden" name="action" value="accessibility">
+
+                            <!-- Font Size -->
+                            <div class="settings-group">
+                                <div class="settings-group-title">Text Size</div>
+                                <p style="margin-bottom: 16px; color: var(--text-muted);">Choose a text size that's
+                                    comfortable for your eyes</p>
+
+                                <div class="font-size-selector">
+                                    <button type="button"
+                                        class="font-size-btn small {% if user.accessibility.font_size == 'small' %}active{% endif %}"
+                                        data-font-size="small">
+                                        <span class="size-preview">Aa</span>
+                                        <span class="size-label">Small</span>
+                                    </button>
+                                    <button type="button"
+                                        class="font-size-btn medium {% if user.accessibility.font_size == 'medium' %}active{% endif %}"
+                                        data-font-size="medium">
+                                        <span class="size-preview">Aa</span>
+                                        <span class="size-label">Medium</span>
+                                    </button>
+                                    <button type="button"
+                                        class="font-size-btn large {% if user.accessibility.font_size == 'large' %}active{% endif %}"
+                                        data-font-size="large">
+                                        <span class="size-preview">Aa</span>
+                                        <span class="size-label">Large</span>
+                                    </button>
+                                    <button type="button"
+                                        class="font-size-btn xlarge {% if user.accessibility.font_size == 'xlarge' %}active{% endif %}"
+                                        data-font-size="xlarge">
+                                        <span class="size-preview">Aa</span>
+                                        <span class="size-label">Extra Large</span>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="font_size" id="font_size_input"
+                                    value="{{ user.accessibility.font_size }}">
+                            </div>
+
+                            <!-- Visual Settings -->
+                            <div class="settings-group">
+                                <div class="settings-group-title">Visual Settings</div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>High Contrast Mode</h4>
+                                        <p>Increases contrast between text and backgrounds for better readability</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="high_contrast" {% if
+                                            user.accessibility.high_contrast %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Reduce Motion</h4>
+                                        <p>Minimizes animations for a calmer experience</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="reduced_motion" {% if
+                                            user.accessibility.reduced_motion %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Voice Navigation Hints</h4>
+                                        <p>Show helpful voice command hints throughout the app</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="voice_enabled" {% if
+                                            user.accessibility.voice_enabled %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-save">
+                                <button type="submit" class="btn btn-primary btn-lg">Save Accessibility
+                                    Settings</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Appearance Panel -->
+                <div class="settings-panel" id="panel-appearance">
+                    <div class="settings-panel-header">
+                        <h2>🎨 Appearance</h2>
+                    </div>
+                    <div class="settings-panel-body">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Theme</div>
+                            <p style="margin-bottom: 20px; color: var(--text-muted);">Choose between light and dark mode
+                            </p>
+
+                            <div class="theme-selector">
+                                <button type="button" class="theme-btn light-theme-btn"
+                                    onclick="CareSwap.Theme.setTheme('light')">
+                                    <span class="theme-btn-icon">☀️</span>
+                                    <span class="theme-btn-label">Light</span>
+                                </button>
+                                <button type="button" class="theme-btn dark-theme-btn"
+                                    onclick="CareSwap.Theme.setTheme('dark')">
+                                    <span class="theme-btn-icon">🌙</span>
+                                    <span class="theme-btn-label">Dark</span>
+                                </button>
+                                <button type="button" class="theme-btn system-theme-btn"
+                                    onclick="localStorage.removeItem('careswap-theme'); location.reload();">
+                                    <span class="theme-btn-icon">💻</span>
+                                    <span class="theme-btn-label">System</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Panel -->
+                <div class="settings-panel" id="panel-account">
+                    <div class="settings-panel-header">
+                        <h2>👤 Account Information</h2>
+                    </div>
+                    <div class="settings-panel-body">
+                        <form method="POST" action="{{ url_for('settings') }}">
+                            <input type="hidden" name="action" value="account">
+
+                            <div class="form-group">
+                                <label class="form-label" for="name">Full Name</label>
+                                <input type="text" id="name" name="name" class="form-input" value="{{ user.name }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="email">Email Address</label>
+                                <input type="email" id="email" class="form-input" value="{{ user.email }}" disabled
+                                    style="background: var(--color-gray-100);">
+                                <div class="form-hint">Contact support to change your email</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" class="form-input" value="{{ user.phone }}"
+                                    placeholder="+65 XXXX XXXX">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="bio">About Me</label>
+                                <textarea id="bio" name="bio" class="form-input form-textarea"
+                                    placeholder="Tell us a bit about yourself..."
+                                    data-maxlength="300">{{ user.bio }}</textarea>
+                            </div>
+
+                            <div class="settings-save">
+                                <button type="submit" class="btn btn-primary btn-lg">Update Account</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Privacy Panel -->
+                <div class="settings-panel" id="panel-privacy">
+                    <div class="settings-panel-header">
+                        <h2>🔒 Privacy Settings</h2>
+                    </div>
+                    <div class="settings-panel-body">
+                        <form method="POST" action="{{ url_for('settings') }}">
+                            <input type="hidden" name="action" value="privacy">
+
+                            <div class="settings-group">
+                                <div class="settings-group-title">Profile Visibility</div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="profile_visibility">Who can see your profile?</label>
+                                    <select id="profile_visibility" name="profile_visibility"
+                                        class="form-input form-select">
+                                        <option value="public" {% if user.privacy.profile_visibility=='public'
+                                            %}selected{% endif %}>Everyone (Public)</option>
+                                        <option value="registered" {% if user.privacy.profile_visibility=='registered'
+                                            %}selected{% endif %}>CareSwap Members Only</option>
+                                        <option value="private" {% if user.privacy.profile_visibility=='private'
+                                            %}selected{% endif %}>Only Me (Private)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-group">
+                                <div class="settings-group-title">Contact Information</div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Show Email on Profile</h4>
+                                        <p>Allow others to see your email address</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="show_email" {% if user.privacy.show_email
+                                            %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Show Phone on Profile</h4>
+                                        <p>Allow others to see your phone number</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="show_phone" {% if user.privacy.show_phone
+                                            %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Allow Contact Requests</h4>
+                                        <p>Let other members send you connection requests</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="allow_contact" {% if user.privacy.allow_contact
+                                            %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Show Activity Status</h4>
+                                        <p>Let others see when you're active on CareSwap</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="show_activity" {% if user.privacy.show_activity
+                                            %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-save">
+                                <button type="submit" class="btn btn-primary btn-lg">Save Privacy Settings</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Notifications Panel -->
+                <div class="settings-panel" id="panel-notifications">
+                    <div class="settings-panel-header">
+                        <h2>🔔 Notification Preferences</h2>
+                    </div>
+                    <div class="settings-panel-body">
+                        <form method="POST" action="{{ url_for('settings') }}">
+                            <input type="hidden" name="action" value="notifications">
+
+                            <div class="settings-group">
+                                <div class="settings-group-title">Email Notifications</div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>New Matches</h4>
+                                        <p>When someone accepts your request or matches with you</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="email_new_match" {% if
+                                            user.notifications.email_new_match %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Messages</h4>
+                                        <p>When someone sends you a message</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="email_messages" {% if
+                                            user.notifications.email_messages %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>Weekly Digest</h4>
+                                        <p>Summary of activity and new requests each week</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="email_weekly" {% if user.notifications.email_weekly
+                                            %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-group">
+                                <div class="settings-group-title">In-App Notifications</div>
+
+                                <div class="settings-item">
+                                    <div class="settings-item-info">
+                                        <h4>All Notifications</h4>
+                                        <p>Receive notifications for all activities</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" name="app_all" {% if user.notifications.app_all
+                                            %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-save">
+                                <button type="submit" class="btn btn-primary btn-lg">Save Notification Settings</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security Panel -->
+                <div class="settings-panel" id="panel-security">
+                    <div class="settings-panel-header">
+                        <h2>🛡️ Security</h2>
+                    </div>
+                    <div class="settings-panel-body">
+                        <form method="POST" action="{{ url_for('settings') }}">
+                            <input type="hidden" name="action" value="password">
+
+                            <div class="settings-group">
+                                <div class="settings-group-title">Change Password</div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="current_password">Current Password</label>
+                                    <input type="password" id="current_password" name="current_password"
+                                        class="form-input">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="new_password">New Password</label>
+                                    <input type="password" id="new_password" name="new_password" class="form-input"
+                                        minlength="8">
+                                    <div class="form-hint">Must be at least 8 characters</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="confirm_password">Confirm New Password</label>
+                                    <input type="password" id="confirm_password" name="confirm_password"
+                                        class="form-input">
+                                </div>
+                            </div>
+
+                            <div class="settings-save">
+                                <button type="submit" class="btn btn-primary btn-lg">Update Password</button>
+                            </div>
+                        </form>
+
+                        <!-- Danger Zone -->
+                        <div class="danger-zone">
+                            <h3>⚠️ Danger Zone</h3>
+                            <p>Once you delete your account, all your data will be permanently removed. This action
+                                cannot be undone.</p>
+                            <button class="btn btn-danger"
+                                data-confirm="Are you absolutely sure you want to delete your account? This action cannot be undone!">
+                                Delete My Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Tab switching
+    document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Update active tab
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Show corresponding panel
+            const panelId = 'panel-' + tab.dataset.tab;
+            document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+        });
+    });
+
+    // Font size selector with instant preview
+    document.querySelectorAll('.font-size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Update active state
+            document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Update hidden input
+            document.getElementById('font_size_input').value = btn.dataset.fontSize;
+
+            // Apply immediately using global CareSwap
+            CareSwap.Accessibility.applyFontSize(btn.dataset.fontSize);
+            CareSwap.Toast.success('Font size changed to ' + btn.dataset.fontSize);
+        });
+    });
+
+    // Theme buttons active state
+    function updateThemeButtons() {
+        const currentTheme = CareSwap.Theme.get();
+        document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+
+        if (currentTheme === 'light') {
+            document.querySelector('.light-theme-btn')?.classList.add('active');
+        } else if (currentTheme === 'dark') {
+            document.querySelector('.dark-theme-btn')?.classList.add('active');
+        }
+    }
+
+    // Initialize
+    updateThemeButtons();
+
+    // Update when theme changes
+    const observer = new MutationObserver(updateThemeButtons);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>
+{% endblock %}

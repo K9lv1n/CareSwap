@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}Youth Dashboard{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .header-info h2 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+    }
+
+    .stat-box {
+        background-color: rgba(255,255,255,0.2);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat-box .number {
+        font-size: 2.5em;
+        font-weight: bold;
+        display: block;
+        color: var(--accent-color);
+    }
+
+    .stat-box .label {
+        font-size: 1.1em;
+        opacity: 0.95;
+    }
+
+    .action-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .action-bar .button {
+        padding: 15px 25px;
+        font-size: 1.1em;
+    }
+
+    .filter-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .filter-section h4 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        font-size: 1.3em;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 10px 20px;
+        background-color: #f0f0f0;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1em;
+    }
+
+    .filter-btn:hover {
+        background-color: #e0e0e0;
+    }
+
+    .filter-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .requests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+
+    .request-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border-left: 5px solid;
+        transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .request-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 15px;
+    }
+
+    .request-card h4 {
+        font-size: 1.5em;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+        flex: 1;
+    }
+
+    .aura-badge {
+        background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 1.1em;
+        white-space: nowrap;
+    }
+
+    .request-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 15px 0;
+        font-size: 1em;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #666;
+    }
+
+    .difficulty-badge {
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .difficulty-easy {
+        background-color: #c8e6c9;
+        color: #2e7d32;
+    }
+
+    .difficulty-medium {
+        background-color: #fff9c4;
+        color: #f57f17;
+    }
+
+    .difficulty-hard {
+        background-color: #ffcdd2;
+        color: #c62828;
+    }
+
+    .request-description {
+        color: #555;
+        line-height: 1.6;
+        margin: 15px 0;
+        flex-grow: 1;
+    }
+
+    .request-footer {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .request-footer .button {
+        flex: 1;
+        padding: 12px;
+        font-size: 1em;
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .type-senior {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .type-careswap {
+        background-color: #fff3e0;
+        color: #f57c00;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .empty-state .icon {
+        font-size: 5em;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: var(--primary-color);
+        font-size: 2em;
+        margin-bottom: 15px;
+    }
+
+    .empty-state p {
+        color: #666;
+        font-size: 1.2em;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .requests-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-header">
+        <div class="header-info">
+            <h2>🚀 Welcome Back, {{ user.name }}!</h2>
+            <p style="font-size: 1.3em;">Ready to make a difference today?</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="number">{{ user.aura_points }}</span>
+                <span class="label">AURA Points</span>
+            </div>
+            <div class="stat-box">
+                <span class="number">{{ user.completed_tasks }}</span>
+                <span class="label">Tasks Done</span>
+            </div>
+            <div class="stat-box">
+                <span class="number">{{ user.rating }}⭐</span>
+                <span class="label">Rating</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <a href="{{ url_for('profile') }}" class="button button-primary">👤 My Profile</a>
+        <button class="button" onclick="alert('Skill Offers: View and manage the skills you offer to seniors!')">
+            📚 My Skill Offers
+        </button>
+        <button class="button" style="background-color: var(--accent-color);" onclick="alert('Redeem AURA rewards for vouchers, badges, and exclusive perks!')">
+            🎁 Redeem Rewards
+        </button>
+    </div>
+
+    <div class="filter-section">
+        <h4>🔍 Filter Requests</h4>
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterRequests('all')">All Requests</button>
+            <button class="filter-btn" onclick="filterRequests('tech')">💻 Tech Help</button>
+            <button class="filter-btn" onclick="filterRequests('physical')">💪 Physical Help</button>
+            <button class="filter-btn" onclick="filterRequests('skillswap')">🔄 SkillSwap</button>
+            <button class="filter-btn" onclick="filterRequests('easy')">🟢 Easy</button>
+            <button class="filter-btn" onclick="filterRequests('medium')">🟡 Medium</button>
+            <button class="filter-btn" onclick="filterRequests('hard')">🔴 Hard</button>
+        </div>
+    </div>
+
+    <h3 style="color: var(--primary-color); font-size: 2em; margin-bottom: 25px;">📋 Open Help & SkillSwap Requests</h3>
+
+    {% if requests %}
+        <div class="requests-grid">
+            {% for req in requests %}
+                <div class="request-card" style="border-left-color: {% if req.user_type == 'CareSwap' %}#ffa500{% else %}#004a77{% endif %};">
+                    <div class="request-header">
+                        <h4>{{ req.title }}</h4>
+                        <span class="aura-badge">+{{ req.aura_points }} ✨</span>
+                    </div>
+
+                    <div class="request-meta">
+                        <span class="type-badge {% if req.user_type == 'CareSwap' %}type-careswap{% else %}type-senior{% endif %}">
+                            {{ req.user_type }}
+                        </span>
+                        <span class="difficulty-badge difficulty-{{ req.difficulty|lower }}">
+                            {{ req.difficulty }}
+                        </span>
+                        <span class="meta-item">📍 {{ req.location }}</span>
+                    </div>
+
+                    <div class="request-description">
+                        {{ req.desc }}
+                    </div>
+
+                    <div class="request-footer">
+                        <button class="button" onclick="viewDetails({{ req.id }})" style="background-color: #2196F3;">
+                            👁️ View Details
+                        </button>
+                        <a href="{{ url_for('accept_request', request_id=req.id) }}" class="button button-success">
+                            ✅ Accept
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="icon">📭</div>
+            <h3>No Open Requests</h3>
+            <p>Check back soon for new opportunities to help!</p>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 50px; padding: 40px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 15px; text-align: center;">
+        <h3 style="color: var(--primary-color); font-size: 2em; margin-bottom: 15px;">🌟 Why CareSwap?</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 25px;">
+            <div>
+                <div style="font-size: 3em; margin-bottom: 10px;">🎯</div>
+                <h4 style="color: var(--primary-color);">Earn Rewards</h4>
+                <p style="color: #666;">Get AURA points for every task</p>
+            </div>
+            <div>
+                <div style="font-size: 3em; margin-bottom: 10px;">🤝</div>
+                <h4 style="color: var(--primary-color);">Build Connections</h4>
+                <p style="color: #666;">Create lasting relationships</p>
+            </div>
+            <div>
+                <div style="font-size: 3em; margin-bottom: 10px;">📚</div>
+                <h4 style="color: var(--primary-color);">Learn & Share</h4>
+                <p style="color: #666;">Exchange skills and knowledge</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function filterRequests(filter) {
+        // Remove active class from all buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Add active class to clicked button
+        event.target.classList.add('active');
+
+        // Filter logic would be implemented here
+        console.log('Filtering by:', filter);
+        alert('Filter: ' + filter + '\n\nIn a full implementation, this would filter the requests shown below.');
+    }
+
+    function viewDetails(requestId) {
+        alert('Request Details #' + requestId + '\n\nThis would show full details including:\n- Senior profile\n- Estimated time\n- Special requirements\n- Communication preferences');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}Senior Dashboard{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard-page {
+        padding: 40px 0;
+        background: var(--bg-primary);
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Welcome Header - Warm Pink */
+    .dashboard-welcome {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-secondary) 100%);
+        border-radius: 24px;
+        padding: 32px;
+        color: white;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 24px;
+        box-shadow: 0 10px 30px rgba(209, 77, 114, 0.25);
+    }
+
+    .welcome-content h1 {
+        font-size: 1.75rem;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .welcome-content p {
+        opacity: 0.95;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.05rem;
+    }
+
+    .welcome-stats {
+        display: flex;
+        gap: 20px;
+    }
+
+    .welcome-stat {
+        text-align: center;
+        padding: 14px 28px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    .welcome-stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    .welcome-stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+        margin-bottom: 32px;
+    }
+
+    .quick-action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        padding: 32px 20px;
+        background: var(--bg-card);
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
+    .quick-action-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.25rem;
+    }
+
+    .quick-action-icon.help {
+        background: linear-gradient(135deg, #fdf2f5, #fbe6eb);
+    }
+
+    .quick-action-icon.swap {
+        background: linear-gradient(135deg, #e0f7f5, #c8f0ed);
+    }
+
+    .quick-action-icon.chat {
+        background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+    }
+
+    .quick-action-icon.learn {
+        background: linear-gradient(135deg, #fff5e6, #ffe4cc);
+    }
+
+    .quick-action-text {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+
+    @media (max-width: 1000px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Sections */
+    .dashboard-section {
+        background: var(--bg-card);
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        border: 1px solid var(--color-gray-200);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 22px 26px;
+        border-bottom: 1px solid var(--color-gray-200);
+        background: var(--bg-secondary);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .section-body {
+        padding: 26px;
+    }
+
+    /* Request Item */
+    .request-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .request-item {
+        display: flex;
+        gap: 16px;
+        padding: 22px;
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        border-left: 4px solid var(--color-primary);
+        transition: all 0.3s ease;
+    }
+
+    .request-item:hover {
+        background: var(--bg-card);
+        box-shadow: var(--shadow-md);
+    }
+
+    .request-item.open {
+        border-left-color: var(--color-success);
+    }
+
+    .request-item.in-progress {
+        border-left-color: var(--color-accent);
+    }
+
+    .request-content {
+        flex: 1;
+    }
+
+    .request-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+    }
+
+    .request-meta {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .request-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .request-status {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-open {
+        background: rgba(78, 205, 196, 0.2);
+        color: var(--color-success-dark);
+    }
+
+    .status-in-progress {
+        background: rgba(245, 166, 35, 0.2);
+        color: var(--color-accent-dark);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 52px 28px;
+    }
+
+    .empty-state-icon {
+        font-size: 4.5rem;
+        margin-bottom: 18px;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        font-size: 1.25rem;
+    }
+
+    .empty-state p {
+        color: var(--text-muted);
+        margin-bottom: 26px;
+        font-size: 1.05rem;
+    }
+
+    /* AI Assistant Card */
+    .ai-assistant-card {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 25px rgba(209, 77, 114, 0.3);
+    }
+
+    .ai-assistant-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .ai-assistant-icon {
+        width: 54px;
+        height: 54px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+    }
+
+    .ai-assistant-header h3 {
+        color: white;
+        font-size: 1.15rem;
+        margin: 0 0 4px 0;
+    }
+
+    .ai-assistant-header p {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .ai-assistant-btn {
+        width: 100%;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: 600;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 1.05rem;
+    }
+
+    .ai-assistant-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Tips Card */
+    .tips-card {
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 22px;
+    }
+
+    .tips-card h4 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        font-size: 1.05rem;
+    }
+
+    .tips-list {
+        list-style: none;
+    }
+
+    .tips-list li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* Notification Card */
+    .notification-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px;
+        background: var(--bg-secondary);
+        border-radius: 14px;
+        margin-bottom: 14px;
+    }
+
+    .notification-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+
+    .notification-icon.match {
+        background: rgba(116, 185, 255, 0.2);
+    }
+
+    .notification-icon.badge {
+        background: rgba(245, 166, 35, 0.2);
+    }
+
+    .notification-content h4 {
+        font-size: 1rem;
+        margin-bottom: 6px;
+    }
+
+    .notification-content p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <div class="container">
+        <!-- Welcome Header -->
+        <div class="dashboard-welcome animate-fade-in">
+            <div class="welcome-content">
+                <h1>👋 Hello, {{ user.name.split()[0] }}!</h1>
+                <p>Welcome back! How can we help you today?</p>
+            </div>
+            <div class="welcome-stats">
+                <div class="welcome-stat">
+                    <div class="welcome-stat-value">✨ {{ user.aura_points }}</div>
+                    <div class="welcome-stat-label">AURA Points</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-value">📋 {{ requests|length }}</div>
+                    <div class="welcome-stat-label">My Requests</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions animate-fade-in-up">
+            <a href="{{ url_for('post_request') }}" class="quick-action-btn">
+                <div class="quick-action-icon help">🆘</div>
+                <span class="quick-action-text">Ask for Help</span>
+            </a>
+            <a href="{{ url_for('post_request') }}?swap=true" class="quick-action-btn">
+                <div class="quick-action-icon swap">🔄</div>
+                <span class="quick-action-text">Skill Swap</span>
+            </a>
+            <a href="#" class="quick-action-btn">
+                <div class="quick-action-icon chat">💬</div>
+                <span class="quick-action-text">Messages</span>
+            </a>
+            <a href="{{ url_for('profile') }}" class="quick-action-btn">
+                <div class="quick-action-icon learn">🏆</div>
+                <span class="quick-action-text">My Badges</span>
+            </a>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div>
+                <div class="dashboard-section animate-fade-in-up stagger-1">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>📋</span>
+                            <span>My Requests</span>
+                        </div>
+                        <a href="{{ url_for('post_request') }}" class="btn btn-primary btn-sm">
+                            + New Request
+                        </a>
+                    </div>
+                    <div class="section-body">
+                        {% if requests %}
+                        <div class="request-list">
+                            {% for req in requests %}
+                            <div class="request-item {{ req.status|lower|replace(' ', '-') }}">
+                                <div class="request-content">
+                                    <div class="request-title">{{ req.title }}</div>
+                                    <div class="request-meta">
+                                        <span class="request-meta-item">
+                                            <span>📍</span>
+                                            <span>{{ req.location }}</span>
+                                        </span>
+                                        <span class="request-meta-item">
+                                            <span>✨</span>
+                                            <span>{{ req.aura_points }} pts</span>
+                                        </span>
+                                        <span class="request-meta-item">
+                                            <span>📅</span>
+                                            <span>{{ req.posted_date }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="request-status status-{{ req.status|lower|replace(' ', '-') }}">
+                                        {{ req.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <h3>No requests yet</h3>
+                            <p>Create your first request to get help from our caring youth volunteers!</p>
+                            <a href="{{ url_for('post_request') }}" class="btn btn-primary btn-lg">
+                                Create My First Request
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- AI Assistant -->
+                <div class="ai-assistant-card animate-fade-in-up stagger-2">
+                    <div class="ai-assistant-header">
+                        <div class="ai-assistant-icon">🤖</div>
+                        <div>
+                            <h3>AI Voice Assistant</h3>
+                            <p>Just speak to ask for help!</p>
+                        </div>
+                    </div>
+                    <button class="ai-assistant-btn">
+                        <span>🎤</span>
+                        <span>Tap to Speak</span>
+                    </button>
+                </div>
+
+                <!-- Notifications -->
+                <div class="dashboard-section animate-fade-in-up stagger-3" style="margin-bottom: 24px;">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>🔔</span>
+                            <span>Notifications</span>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="notification-card">
+                            <div class="notification-icon match">👥</div>
+                            <div class="notification-content">
+                                <h4>New helper matched!</h4>
+                                <p>Alex Tan accepted your WhatsApp request</p>
+                            </div>
+                        </div>
+                        <div class="notification-card">
+                            <div class="notification-icon badge">🏆</div>
+                            <div class="notification-content">
+                                <h4>New badge earned!</h4>
+                                <p>You earned the "Tech Learner" badge</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="dashboard-section animate-fade-in-up stagger-4">
+                    <div class="section-body">
+                        <div class="tips-card">
+                            <h4>💡 Helpful Tips</h4>
+                            <ul class="tips-list">
+                                <li><span>📝</span> Be specific in your request description</li>
+                                <li><span>📍</span> Include your location for faster matching</li>
+                                <li><span>⭐</span> Rate your helper after each task</li>
+                                <li><span>🔄</span> Try skill swaps to teach and learn!</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
